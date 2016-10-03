@@ -19,7 +19,7 @@ from ArticleManagement import views
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
-    url(r'^share_article/', views.share_article),
-    url(r'^insert_article/', views.insert_article),
-    url(r'^print_articles/', views.print_articles),
+    url(r'^share_article/$', views.share_article),
+    url(r'^insert_article/$', views.insert_article),
+    url(r'^print_articles/$', views.print_articles),
 ]

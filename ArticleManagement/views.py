@@ -26,6 +26,8 @@ def insert_article(request):
 
             article.parse()
 
+            print(article.top_image)
+
             article_obj = \
                 Article(
                     url=url,

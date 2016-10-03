@@ -53,7 +53,7 @@ ROOT_URLCONF = 'SocialNewspaper.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates/', 'AuthentificationApp/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
