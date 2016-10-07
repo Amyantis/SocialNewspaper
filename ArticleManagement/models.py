@@ -10,9 +10,13 @@ class Article(models.Model):
 
     top_img = models.CharField(null=False, max_length=300)
 
+    def authors(self):
+        return ArticleAuthor.objects.filter(article=self).only("author")
+
+
 
 class ArticleMeta(models.Model):
-    article = models.ForeignKey(Article)
+    article = models.OneToOneField(Article)
     meta_data = models.CharField(null=True, max_length=150)
     meta_description = models.CharField(null=True, max_length=150)
     meta_favicon = models.CharField(null=True, max_length=300)
@@ -37,12 +41,15 @@ class ArticleImage(models.Model):
 
 
 class Author(models.Model):
-    author = models.CharField(null=False, max_length=30)
+    author = models.CharField(null=False, max_length=30, unique=True)
 
 
 class ArticleAuthor(models.Model):
     article = models.ForeignKey(Article)
     author = models.ForeignKey(Author)
+
+    class Meta:
+        unique_together = ('article', 'author')
 
 
 class ArticleSharing(models.Model):

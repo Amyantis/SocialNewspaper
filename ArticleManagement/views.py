@@ -1,8 +1,8 @@
 import newspaper
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
 from django.db import transaction
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
@@ -17,6 +17,7 @@ def share_article(request):
 
 
 @login_required
+@transaction.atomic
 def insert_article(request):
     template = loader.get_template('article.html')
 
@@ -33,66 +34,65 @@ def insert_article(request):
             article.parse()
 
             try:
-                # transaction
+                article_obj = Article.objects.get(url=url)
+            except ObjectDoesNotExist:
+                article_obj = \
+                    Article(
+                        url=url,
+                        title=article.title,
+                        summary=article.summary,
+                        text=article.text,
+                        top_img=article.top_image
+                    )
+                article_obj.save()
 
-                try:
-                    article_obj = Article.objects.get(url=url)
-                except ObjectDoesNotExist:
-                    article_obj = \
-                        Article(
-                            url=url,
-                            title=article.title,
-                            summary=article.summary,
-                            text=article.text,
-                            top_img=article.top_image
+                for image in article.images:
+                    ArticleImage(
+                        article=article_obj,
+                        img_adress=image
+                    ).save()
+                for author in article.authors:
+                    try:
+                        author = Author.objects.get(
+                            author=author
                         )
-                    article_obj.save()
-
-                    for image in article.images:
-                        ArticleImage(
-                            article=article_obj,
-                            img_adress=image
-                        ).save()
-                    for author in article.authors:
+                    except ObjectDoesNotExist:
                         author = Author(
                             author=author
                         )
                         author.save()
-                        ArticleAuthor(
-                            article=article_obj,
-                            author=author
-                        ).save()
-                    for keyword in article.keywords:
-                        if keyword == '':
-                            continue
-                        ArticleKeyword(
-                            article=article_obj,
-                            keyword=keyword
-                        ).save()
-                    for tag in article.tags:
-                        ArticleTag(
-                            article=article_obj,
-                            keyword=tag
-                        ).save()
-                    ArticleMeta(
+                    ArticleAuthor(
                         article=article_obj,
-                        meta_data=article.meta_data,
-                        meta_description=article.meta_description,
-                        meta_favicon=article.meta_favicon,
-                        meta_img=article.meta_img,
-                        meta_keywords=article.meta_keywords,
-                        meta_language=article.meta_lang
+                        author=author
                     ).save()
-
-                article_sharing = ArticleSharing(
+                for keyword in article.keywords:
+                    if keyword == '':
+                        continue
+                    ArticleKeyword(
+                        article=article_obj,
+                        keyword=keyword
+                    ).save()
+                for tag in article.tags:
+                    ArticleTag(
+                        article=article_obj,
+                        tag=tag
+                    ).save()
+                ArticleMeta(
                     article=article_obj,
-                    user=request.user
-                )
+                    meta_data=article.meta_data,
+                    meta_description=article.meta_description,
+                    meta_favicon=article.meta_favicon,
+                    meta_img=article.meta_img,
+                    meta_keywords=article.meta_keywords,
+                    meta_language=article.meta_lang
+                ).save()
 
-                article_sharing.save()
+            article_sharing = ArticleSharing(
+                article=article_obj,
+                user=request.user
+            )
 
-            except IntegrityError:
-                transaction.rollback()
+            article_sharing.save()
 
             context = {
                 'articles': [article_obj.__dict__]
@@ -100,33 +100,16 @@ def insert_article(request):
 
             return HttpResponse(template.render(context, request))
 
-
-def print_articles_without_count(request):
-    template = loader.get_template('article.html')
-    articles = Article.objects.all()
-
-    context = {
-        'articles': [article.__dict__ for article in articles]
-    }
-
-    return HttpResponse(template.render(context, request))
-
-
 def print_articles(request):
     template = loader.get_template('article.html')
 
-    # TODO: replace the queries above with row SQL to optimize
+    articles = Article.objects.all().annotate(sharings=Count('articlesharing'))
 
-    articles = Article.objects.all()
+    for article in articles:
+        authors = article.authors()
 
     context = {
-        'articles': _zip_sharings_to_article(articles)
+        'articles': articles
     }
 
     return HttpResponse(template.render(context, request))
-
-
-def _zip_sharings_to_article(articles):
-    for article in articles:
-        sharings = len(ArticleSharing.objects.filter(article=article))
-        yield dict(article.__dict__, **{'sharings': sharings})
