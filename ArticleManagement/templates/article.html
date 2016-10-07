@@ -4,6 +4,11 @@
 {% for article in articles %}
 <h1>{{ article.title }}</h1>
 <a href="{{ article.url }}">{{ article.url }}</a>
+<ul>
+    {% for author in article.authors %}
+    <li>{{ author.author.author }}</li>
+    {% endfor %}
+</ul>
 {% if article.sharings %}
 <p>{{ article.sharings }}</p>
 {% endif %}

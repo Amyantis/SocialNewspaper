@@ -106,7 +106,11 @@ def print_articles(request):
     articles = Article.objects.all().annotate(sharings=Count('articlesharing'))
 
     for article in articles:
-        authors = article.authors()
+        article.__dict__.update({'authors': article.authors()})
+
+    articles = [article.__dict__ for article in articles]
+
+    print(articles)
 
     context = {
         'articles': articles

@@ -2,6 +2,12 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+# class ArticleManager(models.Manager):
+#     def get_queryset(self):
+#         articles = super(ArticleManager, self).get_queryset()
+#
+#         return
+
 class Article(models.Model):
     url = models.URLField(null=False, unique=True)
     title = models.CharField(null=False, max_length=30)
