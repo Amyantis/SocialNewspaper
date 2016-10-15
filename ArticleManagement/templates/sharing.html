@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<h1>{{ article.title }}</h1>
+
+{% for sharing in sharings %}
+<ul>
+    <li>{{ sharing.sharing_date}}: {{ sharing.user.username }}</li>
+</ul>
+{% endfor %}
+
+
+{% endblock %}

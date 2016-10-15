@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 {% for article in articles %}
 <h1>{{ article.title }}</h1>
+<img src="{{ article.top_img }}" alt="article.title">
 <a href="{{ article.url }}">{{ article.url }}</a>
 <ul>
     {% for author in article.authors %}
@@ -10,8 +12,10 @@
     {% endfor %}
 </ul>
 {% if article.sharings %}
-<p>{{ article.sharings }}</p>
+<p><a href="{% url 'print_sharing' article_id=article.id %}">{{ article.sharings }} sharings</a></p>
 {% endif %}
+{% if article.score %}(score: {{ article.score }}){% endif %}
+<a href="{% url 'add_interesting' article_id=article.id %}">Interesting!</a>
 <p>{{ article.summary }}</p>
 <p>{{ article.text }}</p>
 {% endfor %}

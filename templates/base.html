@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}SocialNewspaper{% endblock %}</title>
+    <title>SocialNewspaper - {% block title %}{% endblock %}</title>
 </head>
 <body>
+
+<div>
+    <ul>
+        <li><a href="{% url 'share_article' %}">Share Article</a></li>
+        <li><a href="{% url 'print_articles' %}">Editorial</a></li>
+    </ul>
+</div>
+
 <div id="content">
     {% block content %}{% endblock %}
 </div>

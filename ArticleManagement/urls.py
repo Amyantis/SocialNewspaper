@@ -20,7 +20,10 @@ from ArticleManagement import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^share_article/$', views.share_article),
-    url(r'^insert_article/$', views.insert_article),
-    url(r'^print_articles/$', views.print_articles),
+    url(r'^share_article/$', views.share_article, name="share_article"),
+    url(r'^print_sharing/(?P<article_id>[0-9]+)$', views.print_sharing, name="print_sharing"),
+    url(r'^insert_article/$', views.insert_article, name="insert_article"),
+    url(r'^add_interesting/(?P<article_id>[0-9]+)$', views.add_interesting, name="add_interesting"),
+    url(r'^print_articles/$', views.print_articles, name="print_articles"),
+    url(r'^$', views.print_articles)
 ]

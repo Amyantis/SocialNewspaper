@@ -2,7 +2,10 @@ import newspaper
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Avg, FloatField
+from django.db.models import ExpressionWrapper
+from django.db.models import F
+from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
@@ -103,17 +106,47 @@ def insert_article(request):
 def print_articles(request):
     template = loader.get_template('article.html')
 
-    articles = Article.objects.all().annotate(sharings=Count('articlesharing'))
+    articles = Article.objects.all() \
+        .annotate(sharings=Count('articlesharing'), sharing_date_avg=Avg('articlesharing')) \
+        .annotate(
+        score=ExpressionWrapper(10 * F('sharings') + 2 * F('sharing_date_avg'), output_field=FloatField())
+    ) \
+        .order_by('-score')
 
     for article in articles:
         article.__dict__.update({'authors': article.authors()})
 
-    articles = [article.__dict__ for article in articles]
-
-    print(articles)
 
     context = {
         'articles': articles
+    }
+
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def add_interesting(request, article_id):
+    try:
+        article = Article.objects.get(pk=article_id)
+    except Article.DoesNotExist:
+        raise Http404("Article does not exist")
+    article_sharing = ArticleSharing(
+        article=article,
+        user=request.user
+    ).save()
+
+
+def print_sharing(request, article_id):
+    template = loader.get_template('sharing.html')
+    try:
+        article = Article.objects.get(pk=article_id)
+    except Article.DoesNotExist:
+        raise Http404("Article does not exist")
+    sharings_obj = ArticleSharing.objects.filter(article=article)
+
+    context = {
+        'article': article,
+        'sharings': sharings_obj
     }
 
     return HttpResponse(template.render(context, request))
