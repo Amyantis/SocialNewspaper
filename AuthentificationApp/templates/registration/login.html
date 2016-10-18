@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load bootstrap3 %}
 
 {% block content %}
 {% if user.is_authenticated %}
@@ -6,8 +7,10 @@ Connected, {{ user.username }} !
 {% else %}
 <form method="post" action="">
     {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Login"/>
+    {% bootstrap_form form %}
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">Login</button>
+    {% endbuttons %}
 </form>
 {% endif %}
 {% endblock %}

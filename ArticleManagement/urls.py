@@ -25,5 +25,6 @@ urlpatterns = [
     url(r'^insert_article/$', views.insert_article, name="insert_article"),
     url(r'^add_interesting/(?P<article_id>[0-9]+)$', views.add_interesting, name="add_interesting"),
     url(r'^print_articles/$', views.print_articles, name="print_articles"),
-    url(r'^$', views.print_articles)
+    url(r'^editorial/$', views.editorial, name="editorial"),
+    url(r'^$', views.editorial, name="home")
 ]

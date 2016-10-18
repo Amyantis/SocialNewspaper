@@ -1,10 +1,9 @@
+from datetime import date, datetime
+
 import newspaper
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Count, Avg, FloatField
-from django.db.models import ExpressionWrapper
-from django.db.models import F
 from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -22,8 +21,6 @@ def share_article(request):
 @login_required
 @transaction.atomic
 def insert_article(request):
-    template = loader.get_template('article.html')
-
     if request.method == 'POST':
         form = ArticleSharingForm(request.POST)
 
@@ -97,30 +94,80 @@ def insert_article(request):
 
             article_sharing.save()
 
-            context = {
-                'articles': [article_obj.__dict__]
-            }
+            template = loader.get_template('sharing_success.html')
+            return HttpResponse(template.render(request=request))
 
-            return HttpResponse(template.render(context, request))
 
-def print_articles(request):
-    template = loader.get_template('article.html')
+def editorial(request):
+    today_date = date.today()
+    range = {
+        'start_date': datetime(
+            year=today_date.year,
+            month=today_date.month,
+            day=today_date.day - 10,
+        ),
+        'end_date': datetime(
+            year=today_date.year,
+            month=today_date.month,
+            day=today_date.day + 10,
+        )
+    }
 
-    articles = Article.objects.all() \
-        .annotate(sharings=Count('articlesharing'), sharing_date_avg=Avg('articlesharing')) \
-        .annotate(
-        score=ExpressionWrapper(10 * F('sharings') + 2 * F('sharing_date_avg'), output_field=FloatField())
-    ) \
-        .order_by('-score')
+    articles = Article.objects.raw(
+        "SELECT "
+        " ArticleManagement_article.id, "
+        " COUNT(ArticleManagement_articlesharing.article_id) AS sharings, "
+        " 1 * ArticleManagement_article.id + 10 * COUNT(ArticleManagement_articlesharing.article_id) AS score "
+        "FROM ArticleManagement_articlesharing "
+        "LEFT JOIN ArticleManagement_article "
+        "ON ArticleManagement_articlesharing.article_id = ArticleManagement_article.id "
+        "WHERE ArticleManagement_articlesharing.sharing_date "
+        "BETWEEN %s AND %s "
+        "GROUP BY ArticleManagement_article.id "
+        "ORDER BY score DESC"
+        ,
+        [
+            range['start_date'],
+            range['end_date']
+        ]
+    )
 
     for article in articles:
         article.__dict__.update({'authors': article.authors()})
-
 
     context = {
         'articles': articles
     }
 
+    template = loader.get_template('editorial.html')
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def print_articles(request):
+    articles = Article.objects.raw(
+        "SELECT "
+        "  ArticleManagement_article.id, "
+        "  COUNT(ArticleManagement_articlesharing.article_id) AS sharings "
+        "FROM ArticleManagement_articlesharing "
+        "LEFT JOIN ArticleManagement_article "
+        "ON ArticleManagement_articlesharing.article_id = ArticleManagement_article.id "
+        "WHERE ArticleManagement_articlesharing.user_id != %s "
+        "GROUP BY ArticleManagement_article.id "
+        "ORDER BY ArticleManagement_articlesharing.sharing_date DESC ",
+        [
+            request.user.id
+        ]
+    )
+
+    for article in articles:
+        article.__dict__.update({'authors': article.authors()})
+
+    context = {
+        'articles': articles
+    }
+
+    template = loader.get_template('article.html')
     return HttpResponse(template.render(context, request))
 
 
@@ -130,14 +177,15 @@ def add_interesting(request, article_id):
         article = Article.objects.get(pk=article_id)
     except Article.DoesNotExist:
         raise Http404("Article does not exist")
-    article_sharing = ArticleSharing(
+    ArticleSharing(
         article=article,
         user=request.user
     ).save()
+    template = loader.get_template('sharing_success.html')
+    return HttpResponse(template.render(request))
 
 
 def print_sharing(request, article_id):
-    template = loader.get_template('sharing.html')
     try:
         article = Article.objects.get(pk=article_id)
     except Article.DoesNotExist:
@@ -149,4 +197,5 @@ def print_sharing(request, article_id):
         'sharings': sharings_obj
     }
 
+    template = loader.get_template('sharing.html')
     return HttpResponse(template.render(context, request))

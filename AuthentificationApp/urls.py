@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^', include('django.contrib.auth.urls')),
     url('^register/$', CreateView.as_view(
         template_name='registration/register.html',
-        form_class=UserCreationFormEnriched
+        form_class=UserCreationFormEnriched,
+        success_url='/'
     )),
 ]

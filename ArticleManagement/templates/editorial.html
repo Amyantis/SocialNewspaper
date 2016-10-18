@@ -2,9 +2,10 @@
 {% load bootstrap3 %}
 
 {% block content %}
-<h1>Articles for tomorrow
-    <small>Are those articles interesting?</small>
+<h1>The editorial
+    <small>carrefully prepared by your friends</small>
 </h1>
+<p class="text-right">{{ articles | length }} articles today.</p>
 {% for article in articles %}
 <div class="row">
     <h1>{{ article.title }}</h1>
@@ -35,12 +36,8 @@
     </div>
 
     <div class="col-md-2">
-        <h3>
-            <a href="{% url 'add_interesting' article_id=article.id %}">{% bootstrap_icon "glyphicon glyphicon-ok" %}
-                Interesting!</a>
-        </h3>
         {% if article.sharings %}
-        <p><a href="{% url 'print_sharing' article_id=article.id %}">{{ article.sharings }} sharings</a></p>
+        <p>{{ article.sharings }} sharings</p>
         {% endif %}
         <span class="text-success">{% if article.score %}(score: {{ article.score }}){% endif %}</span>
     </div>
