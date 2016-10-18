@@ -7,7 +7,7 @@
 
 {% for sharing in sharings %}
 <ul>
-    <li>{{ sharing.sharing_date}}: {{ sharing.user.username }}</li>
+    <li>{{ sharing.sharing_date}}: {{ sharing.user.first_name } {{ sharing.user.last_name } ({{ sharing.user.username }})</li>
 </ul>
 {% endfor %}
 

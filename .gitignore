@@ -1,0 +1,6 @@
+.idea/dataSources.local.xml
+.idea/dataSources/
+ArticleManagement/migrations/
+AuthentificationApp/__pycache__/
+AuthentificationApp/migrations/
+db.sqlite3

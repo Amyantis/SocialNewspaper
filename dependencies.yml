@@ -1,1 +1,36 @@
-django-bootstrap3
+name: social_news
+dependencies:
+- anaconda-client=1.5.1=py35_0
+- clyent=1.2.2=py35_0
+- django=1.10.2=py35_0
+- openssl=1.0.2j=0
+- pip=8.1.2=py35_0
+- python=3.5.2=0
+- python-dateutil=2.5.3=py35_0
+- pytz=2016.7=py35_0
+- pyyaml=3.12=py35_0
+- readline=6.2=2
+- requests=2.11.1=py35_0
+- setuptools=27.2.0=py35_0
+- six=1.10.0=py35_0
+- sqlite=3.13.0=0
+- tk=8.5.18=0
+- wheel=0.29.0=py35_0
+- xz=5.2.2=0
+- yaml=0.1.6=0
+- zlib=1.2.8=3
+- pip:
+  - beautifulsoup4==4.5.1
+  - cssselect==0.9.2
+  - django-bootstrap3==7.1.0
+  - feedfinder2==0.0.4
+  - feedparser==5.2.1
+  - idna==2.1
+  - jieba3k==0.35.1
+  - lxml==3.6.4
+  - newspaper3k==0.1.7
+  - nltk==3.2.1
+  - pillow==3.4.1
+  - requests-file==1.4.1
+  - tldextract==2.0.2
+prefix: /home/tdancois/miniconda3/envs/social_news

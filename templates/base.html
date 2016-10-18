@@ -24,16 +24,13 @@
             <a class="navbar-brand" href="#">SocialNewspaper</a>
         </div>
         <ul class="nav navbar-nav">
-            <li {% if request.resolver_match.url_name==
-            'home' %}class="active"{% endif %}>
+            <li {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>
             <a href="/">Home</a>
             </li>
-            <li {% if request.resolver_match.url_name==
-            'print_articles' %}class="active"{% endif %}>
+            <li {% if request.resolver_match.url_name == 'print_articles' %}class="active"{% endif %}>
             <a href="{% url 'print_articles' %}">Articles</a>
             </li>
-            <li {% if request.resolver_match.url_name==
-            'share_article' %}class="active"{% endif %}>
+            <li {% if request.resolver_match.url_name == 'share_article' %}class="active"{% endif %}>
             <a href="{% url 'share_article' %}">Share Article</a>
             </li>
         </ul>
